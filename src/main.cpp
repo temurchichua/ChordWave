@@ -6,7 +6,7 @@ void setup()
 {
     Serial.begin(115200);
     display_setup();
-    testscrolltext("es mushaobs");
+    testscrolltext("es mushaobs, Todzo!");
 }
 
 void loop()
