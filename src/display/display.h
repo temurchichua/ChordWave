@@ -6,11 +6,11 @@
 #define CHORDWAVE_DISPLAY_H
 
 
-class display {
+#include "U8g2lib.h"
+
+class display : public U8G2_SSD1306_128X64_NONAME_F_SW_I2C {
+
 
 };
 
-void testscrolltext(void);
-void testscrolltext(char* text);
-void display_setup();
 #endif //CHORDWAVE_DISPLAY_H
