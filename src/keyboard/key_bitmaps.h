@@ -1,3 +1,4 @@
+#pragma once
 #define black_width 7
 #define black_height 26
 static unsigned char black[] = {
