@@ -6,7 +6,7 @@
 #define CHORDWAVE_KEYBOARD_H
 
 // 12 notes
-bool notes[12] = {false, false, false, false, false, false, false, false, false, false, false, false};
+bool notes[12] = {};
 
 // 14 chords
 int chords[14][3] = {
