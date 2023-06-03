@@ -4,7 +4,6 @@
 
 void setup(void) {
     initial_setup();
-    print_keyboard();
 }
 
 void loop(void) {
