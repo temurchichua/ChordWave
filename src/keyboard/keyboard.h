@@ -48,12 +48,12 @@ typedef struct {
 
 
 // functions
+void init_keypad(); // Initialize the keypad
+void scan_keypad(); // scan keypad for pressed keys and update the queue
 void print_keyboard(); // Print the full keyboard to the display
 void animate_keyboard(); // Animate the keyboard
 
-void update_key_by_keypad(char keypad, bool is_pressed); // Update the pressed array by keypad
 void update_key_by_index(uint8_t key_index, bool is_pressed); // Update the pressed array by index
 void print_key(uint8_t key_index, bool print ); // Print a single key to the display
 void check_and_display_key(); // Check the queue and update the pressed array and display
-void keypadEvent(KeypadEvent key); // Keypad event handler
 #endif //CHORDWAVE_KEYBOARD_H
