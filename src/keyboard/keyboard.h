@@ -1,12 +1,16 @@
 //
 // Created by Temur on 31/05/2023.
 //
-
 #ifndef CHORDWAVE_KEYBOARD_H
 #define CHORDWAVE_KEYBOARD_H
-#include "keyboard/key_bitmaps.h"
 #include <U8g2lib.h>
+#include <ArduinoQueue.h>
+#include <Keypad.h>
 
+#include "keyboard/key_bitmaps.h"
+#include "display/display.h"
+
+// Piano Keys
 typedef struct {
     const char* note;
     const char keypad;
@@ -18,11 +22,6 @@ typedef struct {
     const unsigned char* key_bitmap;
     const unsigned char* key_pressed;
 } key_struct;
-
-typedef struct {
-    uint8_t key_index;
-    bool is_pressed;
-} queueItem;
 
 const key_struct keys[12] = {
         {"C", '1', 9, 20, 7, 40, left, left_pressed},
@@ -39,15 +38,22 @@ const key_struct keys[12] = {
         {"B", 'C',57, 20, 7, 40, right, right_pressed},
 };
 
+extern Keypad keypad;
+
+// Queue for updating the pressed array
+typedef struct {
+    uint8_t key_index;
+    bool is_pressed;
+} queueItem;
+
+
 // functions
-void initial_setup();
+void print_keyboard(); // Print the full keyboard to the display
+void animate_keyboard(); // Animate the keyboard
 
-
-void print_keyboard();
-void animate_keyboard();
-
-void update_key_by_keypad(char keypad, bool is_pressed);
-void update_key_by_index(uint8_t key_index, bool is_pressed);
-void print_key(uint8_t, bool);
-void check_and_display_key();
+void update_key_by_keypad(char keypad, bool is_pressed); // Update the pressed array by keypad
+void update_key_by_index(uint8_t key_index, bool is_pressed); // Update the pressed array by index
+void print_key(uint8_t key_index, bool print ); // Print a single key to the display
+void check_and_display_key(); // Check the queue and update the pressed array and display
+void keypadEvent(KeypadEvent key); // Keypad event handler
 #endif //CHORDWAVE_KEYBOARD_H

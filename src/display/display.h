@@ -21,5 +21,7 @@ public:
     }
 };
 
+extern display u8g2;
+
 
 #endif //CHORDWAVE_DISPLAY_H

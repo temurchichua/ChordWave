@@ -2,57 +2,37 @@
 
 #include "keyboard/keyboard.h"
 
-#include <Keypad.h>
-const byte ROWS = 4; // four rows
-const byte COLS = 4; // four columns
-
-char keyboard[ROWS][COLS] = {
-        {'1','2','3', 'A'},
-        {'4','5','6', 'B'},
-        {'7','8','9', 'C'},
-        {'*','0','#', 'D'}
-};
-
-
-byte colPins[COLS] = {D6, D7, D8, D9}; //connect to the column pinouts of the keypad
-byte rowPins[ROWS] = {D0, D3, D4, D5}; //connect to the row pinouts of the keypad
-
-Keypad keypad = Keypad( makeKeymap(keyboard), rowPins, colPins, ROWS, COLS );
-
-// Taking care of some special events.
-void keypadEvent(KeypadEvent key){
-    String eventDescription;
-    eventDescription += key;
-
-    switch (keypad.getState()){
-        case PRESSED:
-            eventDescription += "Pressed: ";
-            update_key_by_keypad(key, true);
-            break;
-
-        case RELEASED:
-            eventDescription += "Released: ";
-            update_key_by_keypad(key, false);
-            break;
-
-        case HOLD:
-            eventDescription += "Hold: ";
-            break;
-    }
-    Serial.println(eventDescription);
-}
 
 void setup(void) {
-    initial_setup();
+    u8g2.init();
+    print_keyboard();
+
     Serial.begin(9600);
-    keypad.addEventListener(keypadEvent);
+//    keypad.addEventListener(keypadEvent);
 }
 void loop(void) {
-    char key = keypad.getKey();
+    if (keypad.getKeys())
+    {
+        for (int i=0; i<LIST_MAX; i++)   // Scan the whole key list.
+        {
+            if ( keypad.key[i].stateChanged )   // Only find keys that have changed state.
+            {
+                switch (keypad.key[i].kstate) {  // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
+                    case PRESSED:
+                        update_key_by_keypad(keypad.key[i].kchar, true);
+                        break;
+                    case HOLD:
+                        break;
+                    case RELEASED:
+                        update_key_by_keypad(keypad.key[i].kchar, false);
+                        break;
+                    case IDLE:
+                        break;
+                }
+                Serial.print(" Key ");
+                Serial.print(keypad.key[i].kcode);
+            }
+        }
+    }
     check_and_display_key();
-//
-//    if (key){
-//        Serial.println(key);
-//    }
-
 }

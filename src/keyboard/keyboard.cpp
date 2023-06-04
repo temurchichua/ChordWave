@@ -3,24 +3,27 @@
 //
 #pragma once
 #include "keyboard.h"
-#include "display/display.h"
-#include <ArduinoQueue.h>
-
-bool pressed[12];
 
 ArduinoQueue<queueItem> update_queue(24);
+bool pressed[12];
 
-const unsigned long interval = 100;  // Animation interval in milliseconds
-unsigned long previousMillis = 0;
-uint8_t currentKey = 0;
+// Keyboard matrix
+const byte ROWS = 4; // four rows
+const byte COLS = 4; // four columns
 
-display u8g2 = display(U8G2_R0, U8X8_PIN_NONE, /* clock=*/ SCL, /* data=*/ SDA);
+char keyboard[ROWS][COLS] = {
+        {'1','2','3', 'A'},
+        {'4','5','6', 'B'},
+        {'7','8','9', 'C'},
+        {'*','0','#', 'D'}
+};
 
-void initial_setup() {
-    u8g2.init();
-    print_keyboard();
-}
+byte colPins[COLS] = {D6, D7, D8, D9}; //connect to the column pinouts of the keypad
+byte rowPins[ROWS] = {D0, D3, D4, D5}; //connect to the row pinouts of the keypad
 
+Keypad keypad = Keypad( makeKeymap(keyboard), rowPins, colPins, ROWS, COLS);
+
+// Print the full keyboard to the display
 void print_keyboard(){
     u8g2.clearBuffer();
 
@@ -63,7 +66,6 @@ void update_key_by_keypad(char keypad, bool is_pressed) {
             break;
         }
     }
-    u8g2.sendBuffer();
 }
 
 void check_and_display_key() {
@@ -73,6 +75,10 @@ void check_and_display_key() {
         print_key(item.key_index, true);
     }
 }
+
+const unsigned long interval = 100;  // Animation interval in milliseconds
+unsigned long previousMillis = 0;
+uint8_t currentKey = 0;
 
 void animate_keyboard(){
     unsigned long currentMillis = millis();
