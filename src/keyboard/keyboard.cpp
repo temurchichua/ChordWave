@@ -68,14 +68,20 @@ void scan_keypad(){
         {
             if ( keypad.key[i].stateChanged )   // Only find keys that have changed state.
             {
+                chord_struct chord_keys = find_chord_by_key_index(keypad.key[i].kcode, chord_type::major);
+
                 switch (keypad.key[i].kstate) {  // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
                     case PRESSED:
-                        update_key_by_index(keypad.key[i].kcode, true);
+                        for (int j = 0; j < 3; j++) {
+                            update_key_by_index(chord_keys.keys[j], true);
+                        }
                         break;
                     case HOLD:
                         break;
                     case RELEASED:
-                        update_key_by_index(keypad.key[i].kcode, false);
+                        for (int j = 0; j < 3; j++) {
+                            update_key_by_index(chord_keys.keys[j], false);
+                        }
                         break;
                     case IDLE:
                         break;

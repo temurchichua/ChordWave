@@ -33,10 +33,18 @@ const key_struct keys[12] = {
         {"A#", '9',53, 20, 6, 25, black, black_pressed},
         {"B", 'C',57, 20, 7, 40, right, right_pressed},
 };
+// Define the chord types
+enum chord_type {
+    major,
+    minor,
+    diminished,
+    augmented
+};
+
 // Define the chord structure
 typedef struct {
     const char* name;
-    const int notes[4]; // Pointers to keys that create the chord
+    const int keys[4]; // Pointers to keys that create the chord
 } chord_struct;
 
 // Define the chord data
@@ -105,5 +113,7 @@ const chord_struct chords[4][12] = {
         {"B 7th", {11, 3, 6, 9}}
     }
 };
+
+chord_struct find_chord_by_key_index(uint8_t key_index, chord_type type);
 
 #endif //CHORDWAVE_CHORDS_H
