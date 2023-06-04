@@ -15,41 +15,27 @@ byte rowPins[4];
 byte colPins[4];
 byte ROWS;
 byte COLS;
-char keyboard[4][4];
+char keyboard[4][4] = {
+        {'1','2','3', 'A'},
+        {'4','5','6', 'B'},
+        {'7','8','9', 'C'},
+        {'*','0','#', 'D'}
+};
 
 Keypad keypad = Keypad( makeKeymap(keyboard), rowPins, colPins, ROWS, COLS );
 
 void init_keypad(){
     if (pad_size == x4x4){
+
         ROWS = 4;
         COLS = 4;
 
-        rowPins[0] = D0;
-        rowPins[1] = D3;
-        rowPins[2] = D4;
-        rowPins[3] = D5;
+        byte rowPins[4] = {D0, D3, D4, D5}; //connect to the row pinouts of the keypad
+        byte colPins[4] = {D6, D7, D8, D9}; //connect to the column pinouts of the keypad
 
-        colPins[0] = D6;
-        colPins[1] = D7;
-        colPins[2] = D8;
-        colPins[3] = D9;
 
-        keyboard[0][0] = '1';
-        keyboard[0][1] = '2';
-        keyboard[0][2] = '3';
-        keyboard[0][3] = 'A';
-        keyboard[1][0] = '4';
-        keyboard[1][1] = '5';
-        keyboard[1][2] = '6';
-        keyboard[1][3] = 'B';
-        keyboard[2][0] = '7';
-        keyboard[2][1] = '8';
-        keyboard[2][2] = '9';
-        keyboard[2][3] = 'C';
-        keyboard[3][0] = '*';
-        keyboard[3][1] = '0';
-        keyboard[3][2] = '#';
-        keyboard[3][3] = 'D';
+        keypad = Keypad( makeKeymap(keyboard), rowPins, colPins, ROWS, COLS );
+
 
     } else {
         ROWS = 1;
