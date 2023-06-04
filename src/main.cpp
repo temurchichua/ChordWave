@@ -14,8 +14,8 @@ char keyboard[ROWS][COLS] = {
 };
 
 
-byte rowPins[ROWS] = {28, 29, 26, 27}; //connect to the column pinouts of the keypad
-byte colPins[COLS] = {24, 25, 22, 23}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {D6, D7, D8, D9}; //connect to the column pinouts of the keypad
+byte rowPins[ROWS] = {D0, D3, D4, D5}; //connect to the row pinouts of the keypad
 
 Keypad keypad = Keypad( makeKeymap(keyboard), rowPins, colPins, ROWS, COLS );
 
@@ -47,7 +47,6 @@ void setup(void) {
     Serial.begin(9600);
     keypad.addEventListener(keypadEvent);
 }
-
 void loop(void) {
     char key = keypad.getKey();
     check_and_display_key();

@@ -14,7 +14,7 @@ const unsigned long interval = 100;  // Animation interval in milliseconds
 unsigned long previousMillis = 0;
 uint8_t currentKey = 0;
 
-display u8g2 = display(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);
+display u8g2 = display(U8G2_R0, U8X8_PIN_NONE, /* clock=*/ SCL, /* data=*/ SDA);
 
 void initial_setup() {
     u8g2.init();
