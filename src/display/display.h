@@ -5,7 +5,7 @@
 #define CHORDWAVE_DISPLAY_H
 #include <U8g2lib.h>
 
-
+// U8G2_SSD1306_128X64_NONAME_F_HW_I2C
 class display : public U8G2 {
 public:
     display(const u8g2_cb_t *rotation, uint8_t clock, uint8_t data, uint8_t reset = U8X8_PIN_NONE) : U8G2() {

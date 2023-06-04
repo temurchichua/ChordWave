@@ -19,6 +19,11 @@ typedef struct {
     const unsigned char* key_pressed;
 } key_struct;
 
+typedef struct {
+    uint8_t key_index;
+    bool is_pressed;
+} queueItem;
+
 const key_struct keys[12] = {
         {"C", '1', 9, 20, 7, 40, left, left_pressed},
         {"C#", '2',13, 20, 6, 25, black, black_pressed},
@@ -36,10 +41,13 @@ const key_struct keys[12] = {
 
 // functions
 void initial_setup();
-void print_key(uint8_t);
+
+
 void print_keyboard();
 void animate_keyboard();
 
 void update_key_by_keypad(char keypad, bool is_pressed);
 void update_key_by_index(uint8_t key_index, bool is_pressed);
+void print_key(uint8_t, bool);
+void check_and_display_key();
 #endif //CHORDWAVE_KEYBOARD_H

@@ -4,13 +4,16 @@
 #pragma once
 #include "keyboard.h"
 #include "display/display.h"
-
+#include <ArduinoQueue.h>
 
 bool pressed[12];
+
+ArduinoQueue<queueItem> update_queue(24);
 
 const unsigned long interval = 100;  // Animation interval in milliseconds
 unsigned long previousMillis = 0;
 uint8_t currentKey = 0;
+
 display u8g2 = display(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);
 
 void initial_setup() {
@@ -33,15 +36,23 @@ void print_keyboard(){
 }
 
 void update_key_by_index(uint8_t key_index, bool is_pressed) {
-    const key_struct key = keys[key_index];
     // update the pressed array
-    pressed[key_index] = is_pressed;
+    queueItem item = {key_index, is_pressed};
+    update_queue.enqueue(item);
+}
+
+void print_key(uint8_t key_index, bool print = false) {
+    const key_struct key = keys[key_index];
     // if pressed then draw the pressed bitmap else draw the normal bitmap
-    const unsigned char* bmp = is_pressed ? key.key_pressed : key.key_bitmap;
+    const unsigned char* bmp = pressed[key_index] ? key.key_pressed : key.key_bitmap;
     // set the color to 1 if pressed else 0
-    is_pressed ? u8g2.setDrawColor(0) : u8g2.setDrawColor(1);
+    pressed[key_index] ? u8g2.setDrawColor(0) : u8g2.setDrawColor(1);
     // update the display buffer
     u8g2.drawXBM(key.x, key.y, key.width, key.height, bmp);
+    // send the buffer to the display
+    if (print) {
+        u8g2.sendBuffer();
+    }
 }
 
 void update_key_by_keypad(char keypad, bool is_pressed) {
@@ -53,6 +64,14 @@ void update_key_by_keypad(char keypad, bool is_pressed) {
         }
     }
     u8g2.sendBuffer();
+}
+
+void check_and_display_key() {
+    if (!update_queue.isEmpty()) {
+        queueItem item = update_queue.dequeue();
+        pressed[item.key_index] = item.is_pressed;
+        print_key(item.key_index, true);
+    }
 }
 
 void animate_keyboard(){

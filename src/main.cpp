@@ -32,11 +32,11 @@ void keypadEvent(KeypadEvent key){
 
         case RELEASED:
             eventDescription += "Released: ";
+            update_key_by_keypad(key, false);
             break;
 
         case HOLD:
             eventDescription += "Hold: ";
-            update_key_by_keypad(key, false);
             break;
     }
     Serial.println(eventDescription);
@@ -49,11 +49,11 @@ void setup(void) {
 }
 
 void loop(void) {
-//    animate_keyboard();
     char key = keypad.getKey();
-
-    if (key){
-        Serial.println(key);
-    }
+    check_and_display_key();
+//
+//    if (key){
+//        Serial.println(key);
+//    }
 
 }
