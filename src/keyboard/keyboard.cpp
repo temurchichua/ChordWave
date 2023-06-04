@@ -2,6 +2,8 @@
 // Created by Temur on 31/05/2023.
 //
 #include "keyboard.h"
+#include "chords.h"
+
 enum key_size{
     x4x4,
     x1x4
