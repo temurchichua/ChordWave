@@ -6,6 +6,7 @@
 #include <U8g2lib.h>
 #include <ArduinoQueue.h>
 #include <Keypad.h>
+#include <Wire.h>
 
 #include "display/display.h"
 

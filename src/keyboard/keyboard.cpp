@@ -32,8 +32,8 @@ void init_keypad(){
         ROWS = 4;
         COLS = 4;
 
-        byte rowPins[4] = {D0, D3, D4, D5}; //connect to the row pinouts of the keypad
-        byte colPins[4] = {D6, D7, D8, D9}; //connect to the column pinouts of the keypad
+        byte rowPins[4] = {14, 27, 26, 25}; //connect to the row pinouts of the keypad
+        byte colPins[4] = {33, 32, 35, 34}; //connect to the column pinouts of the keypad
 
 
         keypad = Keypad( makeKeymap(keyboard), rowPins, colPins, ROWS, COLS );
@@ -43,12 +43,12 @@ void init_keypad(){
         ROWS = 1;
         COLS = 4;
 
-        rowPins[0] = D0;
+        rowPins[0] = 14;
 
-        colPins[0] = D6;
-        colPins[1] = D5;
-        colPins[2] = D9;
-        colPins[3] = D7;
+        colPins[0] = 27;
+        colPins[1] = 26;
+        colPins[2] = 25;
+        colPins[3] = 32;
 
         keyboard[0][0] = '1';
         keyboard[0][1] = '2';
