@@ -13,7 +13,8 @@ public:
         u8x8_SetPin_HW_I2C(getU8x8(), reset, clock, data);
     }
 
-    void init(){
+    void init(uint8_t address_i2c = 0x3C){
+        this->setI2CAddress(address_i2c);
         this->begin();
 
         this->setBitmapMode(1);

@@ -4,7 +4,7 @@
 
 
 void setup(void) {
-    u8g2.init();
+    u8g2.init(0x3C);
     init_keypad();
     print_keyboard();
 
