@@ -3,26 +3,21 @@
 //
 #include "keyboard.h"
 #include "chords.h"
-#include <SparkFunSX1509.h> //Click here for the library: http://librarymanager/All#SparkFun_SX1509
+#include <SparkFunSX1509.h>               //Click here for the library: http://librarymanager/All#SparkFun_SX1509
 
-SX1509 io_buttons;                        // Create an SX1509 object for buttons
+SX1509 io;                        // Create an SX1509 object for buttons
 SX1509 io_leds;                           // Create an SX1509 object for leds
 
 ArduinoQueue<queueItem> update_queue(24);
-bool pressed[12];
-
-char keyMap[BTN_COLUMNS][BTN_ROWS] = {
-        {'1','2','3', 'A'},
-        {'4','5','6', 'B'},
-        {'7','8','9', 'C'},
-        {'*','0','#', 'D'}
-};
+bool pressed[16]; // array of pressed keys
+static const uint8_t button_grounds[NUM_BTN_COLUMNS] = {0, 1, 2, 3};
+static const uint8_t button_rows[NUM_BTN_ROWS] = {8, 9, 10, 11};
 
 void init_keypad(){
     // Call io.begin(<address>) to initialize the SX1509. If it
     // successfully communicates, it'll return 1.
     bool io_success;
-    io_success = io_buttons.begin(SX1509_BUTTONS_ADDRESS);
+    io_success = io.begin(SX1509_BUTTONS_ADDRESS);
     if (!io_success) {
         Serial.print("Failed to communicate with Buttons Extender at 0x");
         Serial.print(SX1509_BUTTONS_ADDRESS, HEX);
@@ -30,8 +25,24 @@ void init_keypad(){
         while (1)
             ; // If we fail to communicate, loop forever.
     };
-    io_buttons.keypad(BTN_ROWS, BTN_COLUMNS,
-                      SLEEP_TIME, SCAN_TIME, DEBOUNCE_TIME);
+    // button columns
+    for (uint8_t i = 0; i < NUM_BTN_COLUMNS; i++) {
+        io.pinMode(button_grounds[i], OUTPUT);
+        // with nothing selected by default
+        io.digitalWrite(button_grounds[i], HIGH);
+    }
+
+    // button row input lines
+    for (uint8_t i = 0; i < NUM_BTN_ROWS; i++) {
+        io.pinMode(button_rows[i], INPUT_PULLUP);
+    }
+
+    // Initialize the debounce counter array
+    for (uint8_t i = 0; i < NUM_BTN_COLUMNS; i++) {
+        for (uint8_t j = 0; j < NUM_BTN_ROWS; j++) {
+            debounce_count[i][j] = 0;
+        }
+    }
 
     // Set up the Arduino interrupt pin as an input w/
     // internal pull-up. (The SX1509 interrupt is active-low.)
@@ -40,46 +51,52 @@ void init_keypad(){
     Serial.println("SX1509 Buttons: OK.");
 }
 
-// Compared to the keypad in keypad.ino, this keypad example
-// is a bit more advanced. We'll use these varaibles to check
-// if a key is being held down, or has been released. Then we
-// can kind of emulate the operation of a computer keyboard.
-unsigned int previousKeyData = 0;         // Stores last key pressed
-unsigned int holdCount, releaseCount = 0; // Count durations
-const unsigned int holdCountMax = 15;     // Key hold limit
-const unsigned int releaseCountMax = 100; // Release limit
-
 // scan keypad for pressed keys and update the queue
 void scan_keypad(){
-    // Use io.readKeypad() to get the raw keypad row/column
-    unsigned int keyData = io_buttons.readKeypad();
+    //TODO: https://forum.pjrc.com/threads/42064-fix-behavior-of-keyPad-scanning-with-SX1509-port-expander
+    static uint8_t current = 0;
+    uint8_t val;
+    uint8_t j;
 
-    // Then use io.getRow() and io.getCol() to parse that
-    // data into row and column values.
-    byte row = io_buttons.getRow(keyData);
-    byte col = io_buttons.getCol(keyData);
-    // Then plug row and column into keyMap to get which
-    // key was pressed.
-    char key = keyMap[row][col];
+    io.digitalWrite(button_grounds[current], LOW);
 
-    // If it's a new key pressed
-    if (keyData != previousKeyData) {
-        holdCount = 0;               // Reset hold-down count
-        Serial.print("Key pressed: "); // Print the key
-        Serial.println(key);
-    } else {
-        // If the button's being held down:
-        holdCount++;                  // Increment holdCount
-        if (holdCount > holdCountMax) // If it exceeds threshold
-            Serial.print("Holding: "); // Print "Holding: "
-            Serial.println(key);          // Print the key
+    // Read the button inputs
+    for ( j = 0; j < NUM_BTN_ROWS; j++) {
+        val = io.digitalRead(button_rows[j]);
+        uint8_t key_index = (current * NUM_BTN_ROWS) + j;
+
+        if (val == LOW) {
+            // active low: val is low when btn is pressed
+            if ( debounce_count[current][j] < MAX_DEBOUNCE) {
+                debounce_count[current][j]++;
+                if ( debounce_count[current][j] == MAX_DEBOUNCE ) {
+                    Serial.print("Key Down ");
+                    Serial.println((current * NUM_BTN_ROWS) + j);
+                    update_key_by_index(key_index, true);
+                }
+            }
+        } else {
+            // otherwise, button is released
+            if ( debounce_count[current][j] > 0) {
+                debounce_count[current][j]--;
+                if ( debounce_count[current][j] == 0 ) {
+                    Serial.print("Key Up ");
+                    Serial.println((current * NUM_BTN_ROWS) + j);
+                    update_key_by_index(key_index, false);
+                }
+            }
+        }
     }
-    releaseCount = 0;          // Clear the releaseCount variable
-    previousKeyData = keyData; // Update previousKeyData
+    current++;
+    if (current >= NUM_BTN_COLUMNS) {
+        current = 0;
+    }
 }
 
 void update_key_by_index(uint8_t key_index, bool is_pressed) {
     // update the pressed array
+    pressed[key_index] = is_pressed;
+    // add the key to the queue
     queueItem item = {key_index, is_pressed};
     update_queue.enqueue(item);
 }

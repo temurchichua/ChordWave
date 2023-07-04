@@ -4,16 +4,16 @@
 
 
 void setup(void) {
+    Serial.begin(115200);
+
     u8g2.init(0x3C);
     init_keypad();
     print_keyboard();
 
-    Serial.begin(115200);
+    Serial.println("Setup complete");
 //    keypad.addEventListener(keypadEvent);
 }
 void loop(void) {
-    if (digitalRead(INT_PIN) == LOW){
-        scan_keypad();
-    }
+    scan_keypad();
     check_and_display_key();
 }
