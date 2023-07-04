@@ -44,7 +44,7 @@ enum chord_type {
 // Define the chord structure
 typedef struct {
     const char* name;
-    const int keys[4]; // Pointers to keys that create the chord
+    const int keys[4]; // indexes to keys that create the chord
 } chord_struct;
 
 // Define the chord data

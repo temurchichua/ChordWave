@@ -3,92 +3,79 @@
 //
 #include "keyboard.h"
 #include "chords.h"
+#include <SparkFunSX1509.h> //Click here for the library: http://librarymanager/All#SparkFun_SX1509
 
-enum key_size{
-    x4x4,
-    x1x4
-};
-
-key_size pad_size = x1x4;
+SX1509 io_buttons;                        // Create an SX1509 object for buttons
+SX1509 io_leds;                           // Create an SX1509 object for leds
 
 ArduinoQueue<queueItem> update_queue(24);
 bool pressed[12];
-byte rowPins[4];
-byte colPins[4];
-byte ROWS;
-byte COLS;
-char keyboard[4][4] = {
+
+char keyMap[BTN_COLUMNS][BTN_ROWS] = {
         {'1','2','3', 'A'},
         {'4','5','6', 'B'},
         {'7','8','9', 'C'},
         {'*','0','#', 'D'}
 };
 
-Keypad keypad = Keypad( makeKeymap(keyboard), rowPins, colPins, ROWS, COLS );
-
 void init_keypad(){
-    if (pad_size == x4x4){
+    // Call io.begin(<address>) to initialize the SX1509. If it
+    // successfully communicates, it'll return 1.
+    bool io_success;
+    io_success = io_buttons.begin(SX1509_BUTTONS_ADDRESS);
+    if (!io_success) {
+        Serial.print("Failed to communicate with Buttons Extender at 0x");
+        Serial.print(SX1509_BUTTONS_ADDRESS, HEX);
+        Serial.println(".");
+        while (1)
+            ; // If we fail to communicate, loop forever.
+    };
+    io_buttons.keypad(BTN_ROWS, BTN_COLUMNS,
+                      SLEEP_TIME, SCAN_TIME, DEBOUNCE_TIME);
 
-        ROWS = 4;
-        COLS = 4;
+    // Set up the Arduino interrupt pin as an input w/
+    // internal pull-up. (The SX1509 interrupt is active-low.)
+    pinMode(INT_PIN, INPUT_PULLUP);
 
-        byte rowPins[4] = {14, 27, 26, 25}; //connect to the row pinouts of the keypad
-        byte colPins[4] = {33, 32, 35, 34}; //connect to the column pinouts of the keypad
-
-
-        keypad = Keypad( makeKeymap(keyboard), rowPins, colPins, ROWS, COLS );
-
-
-    } else {
-        ROWS = 1;
-        COLS = 4;
-
-        rowPins[0] = 14;
-
-        colPins[0] = 27;
-        colPins[1] = 26;
-        colPins[2] = 25;
-        colPins[3] = 32;
-
-        keyboard[0][0] = '1';
-        keyboard[0][1] = '2';
-        keyboard[0][2] = '3';
-        keyboard[0][3] = '4';
-    }
-
-    keypad = Keypad(makeKeymap((char*)keyboard), rowPins, colPins, ROWS, COLS);
-
+    Serial.println("SX1509 Buttons: OK.");
 }
+
+// Compared to the keypad in keypad.ino, this keypad example
+// is a bit more advanced. We'll use these varaibles to check
+// if a key is being held down, or has been released. Then we
+// can kind of emulate the operation of a computer keyboard.
+unsigned int previousKeyData = 0;         // Stores last key pressed
+unsigned int holdCount, releaseCount = 0; // Count durations
+const unsigned int holdCountMax = 15;     // Key hold limit
+const unsigned int releaseCountMax = 100; // Release limit
 
 // scan keypad for pressed keys and update the queue
 void scan_keypad(){
-    if (keypad.getKeys())
-    {
-        for (int i=0; i<LIST_MAX; i++)   // Scan the whole key list.
-        {
-            if ( keypad.key[i].stateChanged )   // Only find keys that have changed state.
-            {
-                chord_struct chord_keys = find_chord_by_key_index(keypad.key[i].kcode, chord_type::major);
+    // Use io.readKeypad() to get the raw keypad row/column
+    unsigned int keyData = io_buttons.readKeypad();
 
-                switch (keypad.key[i].kstate) {  // Report active key state : IDLE, PRESSED, HOLD, or RELEASED
-                    case PRESSED:
-                        for (int j = 0; j < 3; j++) {
-                            update_key_by_index(chord_keys.keys[j], true);
-                        }
-                        break;
-                    case HOLD:
-                        break;
-                    case RELEASED:
-                        for (int j = 0; j < 3; j++) {
-                            update_key_by_index(chord_keys.keys[j], false);
-                        }
-                        break;
-                    case IDLE:
-                        break;
-                }
-            }
-        }
+    // Then use io.getRow() and io.getCol() to parse that
+    // data into row and column values.
+    byte row = io_buttons.getRow(keyData);
+    byte col = io_buttons.getCol(keyData);
+    // Then plug row and column into keyMap to get which
+    // key was pressed.
+    char key = keyMap[row][col];
+
+    // If it's a new key pressed
+    if (keyData != previousKeyData) {
+        holdCount = 0;               // Reset hold-down count
+        Serial.print("Key pressed: "); // Print the key
+        Serial.println(key);
+    } else {
+        // If the button's being held down:
+        holdCount++;                  // Increment holdCount
+        if (holdCount > holdCountMax) // If it exceeds threshold
+            Serial.print("Holding: "); // Print "Holding: "
+            Serial.println(key);          // Print the key
     }
+    releaseCount = 0;          // Clear the releaseCount variable
+    previousKeyData = keyData; // Update previousKeyData
 }
 
 void update_key_by_index(uint8_t key_index, bool is_pressed) {

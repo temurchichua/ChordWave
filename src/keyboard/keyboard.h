@@ -1,23 +1,43 @@
 //
 // Created by Temur on 31/05/2023.
 //
+#pragma once
 #ifndef CHORDWAVE_KEYBOARD_H
 #define CHORDWAVE_KEYBOARD_H
 #include <U8g2lib.h>
 #include <ArduinoQueue.h>
-#include <Keypad.h>
 #include <Wire.h>
 
 #include "display/display.h"
-
-
-extern Keypad keypad;
 
 // Queue for updating the pressed array
 typedef struct {
     uint8_t key_index;
     bool is_pressed;
 } queueItem;
+
+//config variables
+#define LED_COLUMNS (4)
+#define LED_ROWS (4)
+
+#define BTN_COLUMNS (4)
+#define BTN_ROWS (4)
+
+#define NUM_COLORS (3)
+
+#define INT_PIN (4) // Interrupt pin for SX1509
+
+// Scan time range: 1-128 ms, powers of 2
+#define SCAN_TIME (8) // Scan time per row, in ms
+// Debounce time range: 0.5 - 64 ms (powers of 2)
+#define DEBOUNCE_TIME (1)
+// Sleep time range: 128 ms - 8192 ms (powers of 2) 0=OFF
+#define SLEEP_TIME (100)
+// Scan time must be greater than debounce time!
+
+// SX1509 I2C address (set by ADDR1 and ADDR0 (00 by default):
+const byte SX1509_BUTTONS_ADDRESS = 0x3F; // SX1509 I2C address
+const byte SX1509_LEDS_ADDRESS = 0xe3E;   // SX1509 I2C address
 
 
 // functions

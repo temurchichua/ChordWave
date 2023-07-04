@@ -8,10 +8,12 @@ void setup(void) {
     init_keypad();
     print_keyboard();
 
-    Serial.begin(9600);
+    Serial.begin(115200);
 //    keypad.addEventListener(keypadEvent);
 }
 void loop(void) {
-    scan_keypad();
+    if (digitalRead(INT_PIN) == LOW){
+        scan_keypad();
+    }
     check_and_display_key();
 }
