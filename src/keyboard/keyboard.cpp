@@ -54,48 +54,51 @@ void init_keypad(){
 // scan keypad for pressed keys and update the queue
 void scan_keypad(){
     //TODO: https://forum.pjrc.com/threads/42064-fix-behavior-of-keyPad-scanning-with-SX1509-port-expander
-    static uint8_t current = 0;
     uint8_t val;
-    uint8_t j;
+    uint8_t i, j = 0;
 
-    io.digitalWrite(button_grounds[current], LOW);
+    while (i < NUM_BTN_COLUMNS) {
+        io.digitalWrite(button_grounds[i], LOW); // select the column to read
 
-    // Read the button inputs
-    for ( j = 0; j < NUM_BTN_ROWS; j++) {
-        val = io.digitalRead(button_rows[j]);
-        uint8_t key_index = (current * NUM_BTN_ROWS) + j;
+        // Read the button inputs
+        for ( j = 0; j < NUM_BTN_ROWS; j++) {
+            val = io.digitalRead(button_rows[j]);
+            uint8_t key_index = (i * NUM_BTN_ROWS) + j;
 
-        if (val == LOW) {
-            // active low: val is low when btn is pressed
-            if ( debounce_count[current][j] < MAX_DEBOUNCE) {
-                debounce_count[current][j]++;
-                if ( debounce_count[current][j] == MAX_DEBOUNCE ) {
-                    Serial.print("Key Down ");
-                    Serial.println((current * NUM_BTN_ROWS) + j);
-                    update_key_by_index(key_index, true);
+            if (val == LOW) {
+                // active low: val is low when btn is pressed
+                if (debounce_count[i][j] < MAX_DEBOUNCE) {
+                    debounce_count[i][j]++;
+                    if (debounce_count[i][j] == MAX_DEBOUNCE ) {
+                        Serial.print("Key Down ");
+                        Serial.println((i * NUM_BTN_ROWS) + j);
+                        if (key_index < 12)
+                            update_key_by_index(key_index, true);
+                        else
+                            change_chord_type((chord_type) (key_index - 12));
+                    }
                 }
-            }
-        } else {
-            // otherwise, button is released
-            if ( debounce_count[current][j] > 0) {
-                debounce_count[current][j]--;
-                if ( debounce_count[current][j] == 0 ) {
-                    Serial.print("Key Up ");
-                    Serial.println((current * NUM_BTN_ROWS) + j);
-                    update_key_by_index(key_index, false);
+            } else {
+                // otherwise, button is released
+                if (debounce_count[i][j] > 0) {
+                    debounce_count[i][j]--;
+                    if (debounce_count[i][j] == 0 ) {
+                        Serial.print("Key Up ");
+                        Serial.println((i * NUM_BTN_ROWS) + j);
+                        if (key_index < 12)
+                            update_key_by_index(key_index, false);
+                    }
                 }
             }
         }
-    }
-    current++;
-    if (current >= NUM_BTN_COLUMNS) {
-        current = 0;
+
+        // deselect the column
+        io.digitalWrite(button_grounds[i], HIGH);
+        i++;
     }
 }
 
 void update_key_by_index(uint8_t key_index, bool is_pressed) {
-    // update the pressed array
-    pressed[key_index] = is_pressed;
     // add the key to the queue
     queueItem item = {key_index, is_pressed};
     update_queue.enqueue(item);
@@ -115,11 +118,28 @@ void print_key(uint8_t key_index, bool print = false) {
     }
 }
 
-void check_and_display_key() {
+void process_pressed_key() {
     if (!update_queue.isEmpty()) {
         queueItem item = update_queue.dequeue();
-        pressed[item.key_index] = item.is_pressed;
-        print_key(item.key_index, true);
+        chord_struct active_chord = chords[current_chord_type][item.key_index];
+
+        uint8_t number_of_notes = 3;
+        if ( current_chord_type == augmented )
+            number_of_notes = 4;
+
+        Serial.print("Playing Chord: ");
+        Serial.print(active_chord.name);
+        Serial.print(" ");
+        Serial.print(type_to_string(current_chord_type));
+        Serial.print(" with notes at: ");
+        for (int i = 0; i < number_of_notes; ++i) {
+            uint8_t key_index = active_chord.keys[i];
+            Serial.print(key_index);
+            Serial.print(" ");
+            pressed[key_index] = item.is_pressed;
+            print_key(key_index, true);
+        }
+        Serial.println();
     }
 }
 
@@ -136,26 +156,4 @@ void print_keyboard(){
 
     }
     u8g2.sendBuffer();
-}
-
-const unsigned long interval = 100;  // Animation interval in milliseconds
-unsigned long previousMillis = 0;
-uint8_t currentKey = 0;
-
-void animate_keyboard(){
-    unsigned long currentMillis = millis();
-
-    if (currentMillis - previousMillis >= interval) {
-        previousMillis = currentMillis;
-
-        if (currentKey == 12) {
-            currentKey = 0;
-        }
-
-        update_key_by_index(currentKey, true);
-        u8g2.sendBuffer();
-
-        update_key_by_index(currentKey, false);
-        currentKey++;
-    }
 }

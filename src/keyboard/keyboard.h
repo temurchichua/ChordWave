@@ -50,5 +50,5 @@ void animate_keyboard(); // Animate the keyboard
 
 void update_key_by_index(uint8_t key_index, bool is_pressed); // Update the pressed array by index
 void print_key(uint8_t key_index, bool print ); // Print a single key to the display
-void check_and_display_key(); // Check the queue and update the pressed array and display
+void process_pressed_key(); // Check the queue and update the pressed array and display
 #endif //CHORDWAVE_KEYBOARD_H

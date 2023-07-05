@@ -15,5 +15,5 @@ void setup(void) {
 }
 void loop(void) {
     scan_keypad();
-    check_and_display_key();
+    process_pressed_key();
 }

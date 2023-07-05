@@ -1,7 +1,7 @@
 //
 // Created by Temur on 04/06/2023.
 //
-
+#pragma once
 #ifndef CHORDWAVE_CHORDS_H
 #define CHORDWAVE_CHORDS_H
 #include "key_bitmaps.h"
@@ -40,6 +40,10 @@ enum chord_type {
     diminished,
     augmented
 };
+
+extern chord_type current_chord_type;
+
+char* type_to_string(chord_type type);
 
 // Define the chord structure
 typedef struct {
@@ -115,5 +119,8 @@ const chord_struct chords[4][12] = {
 };
 
 chord_struct find_chord_by_key_index(uint8_t key_index, chord_type type);
+
+void change_chord_type(chord_type type);
+
 
 #endif //CHORDWAVE_CHORDS_H
