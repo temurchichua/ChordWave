@@ -3,12 +3,12 @@
 //
 #include "keyboard.h"
 #include "chords.h"
+#include "midible/midioverble.h"
 #include <SparkFunSX1509.h>               //Click here for the library: http://librarymanager/All#SparkFun_SX1509
 
 SX1509 io;                        // Create an SX1509 object for buttons
-SX1509 io_leds;                           // Create an SX1509 object for leds
 
-ArduinoQueue<queueItem> update_queue(24);
+ArduinoQueue<queueItem> update_queue(4);
 bool pressed[16]; // array of pressed keys
 static const uint8_t button_grounds[NUM_BTN_COLUMNS] = {0, 1, 2, 3};
 static const uint8_t button_rows[NUM_BTN_ROWS] = {8, 9, 10, 11};
@@ -43,10 +43,6 @@ void init_keypad(){
             debounce_count[i][j] = 0;
         }
     }
-
-    // Set up the Arduino interrupt pin as an input w/
-    // internal pull-up. (The SX1509 interrupt is active-low.)
-    pinMode(INT_PIN, INPUT_PULLUP);
 
     Serial.println("SX1509 Buttons: OK.");
 }
@@ -132,13 +128,23 @@ void process_pressed_key() {
         Serial.print(" ");
         Serial.print(type_to_string(current_chord_type));
         Serial.print(" with notes at: ");
+
+        midi_chord midi_chord_item;
+        midi_chord_item.is_pressed = item.is_pressed;
+        midi_chord_item.number_of_notes = number_of_notes;
+
         for (int i = 0; i < number_of_notes; ++i) {
             uint8_t key_index = active_chord.keys[i];
+
             Serial.print(key_index);
             Serial.print(" ");
+
+            midi_chord_item.notes[i] = keys[key_index].midi_note;
             pressed[key_index] = item.is_pressed;
             print_key(key_index, true);
         }
+
+        midi_chords_queue.enqueue(midi_chord_item);
         Serial.println();
     }
 }

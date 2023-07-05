@@ -10,6 +10,7 @@
 typedef struct {
     const char* note;
     const char keypad;
+    const int midi_note;
     const int x;
     const int y;
     const int width;
@@ -20,19 +21,20 @@ typedef struct {
 } key_struct;
 
 const key_struct keys[12] = {
-        {"C", '1', 9, 20, 7, 40, left, left_pressed},
-        {"C#", '2',13, 20, 6, 25, black, black_pressed},
-        {"D", '3',17, 20, 7, 40, middle, middle_pressed},
-        {"D#", 'A',21, 20, 6, 25, black, black_pressed},
-        {"E", '4',25, 20, 7, 40, right, right_pressed},
-        {"F", '5',33, 20, 7, 40, left, left_pressed},
-        {"F#", '6',37, 20, 6, 25, black, black_pressed},
-        {"G", 'B',41, 20, 7, 40, middle, middle_pressed},
-        {"G#", '7',45, 20, 6, 25, black, black_pressed},
-        {"A", '8',49, 20, 7, 40, middle, middle_pressed},
-        {"A#", '9',53, 20, 6, 25, black, black_pressed},
-        {"B", 'C',57, 20, 7, 40, right, right_pressed},
+        {"C", '1', 60, 9, 20, 7, 40, left, left_pressed},
+        {"C#", '2', 61, 13, 20, 6, 25, black, black_pressed},
+        {"D", '3', 62, 17, 20, 7, 40, middle, middle_pressed},
+        {"D#", 'A', 63, 21, 20, 6, 25, black, black_pressed},
+        {"E", '4', 64, 25, 20, 7, 40, right, right_pressed},
+        {"F", '5', 65, 33, 20, 7, 40, left, left_pressed},
+        {"F#", '6', 66, 37, 20, 6, 25, black, black_pressed},
+        {"G", 'B', 67, 41, 20, 7, 40, middle, middle_pressed},
+        {"G#", '7', 68, 45, 20, 6, 25, black, black_pressed},
+        {"A", '8', 69, 49, 20, 7, 40, middle, middle_pressed},
+        {"A#", '9', 70, 53, 20, 6, 25, black, black_pressed},
+        {"B", 'C', 71, 57, 20, 7, 40, right, right_pressed},
 };
+
 // Define the chord types
 enum chord_type {
     major,
