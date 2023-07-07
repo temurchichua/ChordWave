@@ -5,12 +5,16 @@
 #include "lights.h"
 
 SX1509 leds_io;
+// pins are conected to the grounds (left side of 4x4 matrix)
 static const uint8_t rgb_grounds[LED_COLUMNS]         = {0, 1, 2, 3};
 
-static const uint8_t rgb_rows[LED_ROWS][NUM_COLORS]   = {{4, 5, 6}, 
-                                                         {7, 8, 9}, 
-                                                         {10, 11, 12}, 
+// array represent rows of rgb lights with [RED, GREEN, BLUE] pin numbers
+static const uint8_t rgb_rows[LED_ROWS][NUM_COLORS]   = {{4, 5, 6},
+                                                         {7, 8, 9},
+                                                         {10, 11, 12},
                                                          {13, 14, 15}};
+// array to store the color state of each led
+static colors led_colors[LED_COLUMNS][LED_ROWS]; // array of colors for each led
 
 // Initialize the leds
 void init_leds(){
@@ -40,52 +44,68 @@ void init_leds(){
             leds_io.digitalWrite(rgb_rows[i][j], LOW); // set the pin to low (off) default
         }
     }
-    // turn the first led on
-    leds_io.digitalWrite(rgb_rows[0][0], HIGH);
-    leds_io.digitalWrite(rgb_grounds[0], LOW);
+    Serial.println("SX1509 LEDs: OK.");
 
 }
 
-// Animate the leds using millis()
-unsigned long prevMillis = 0;
-const long interval = 200; // interval at which to animate (milliseconds)
-uint8_t i, j = 0;
+void print_leds(){
+    // scan over the matrix and turn on the leds according to the led_colors array
+    // make sure to only turn the color on that is specified in the led colors array
+    // iterate over columns
+    for (uint8_t i = 0; i < LED_COLUMNS; i++) {
+        // array with values of pins that will be pulled high
+        uint8_t high_pins[LED_ROWS] = {99, 99, 99, 99};
+        // turn the ground pin low to turn on the leds
+        leds_io.digitalWrite(rgb_grounds[i], LOW);
+        // iterate over rows
+        for (uint8_t j = 0; j < LED_ROWS; j++) {
+            // check the color of the led and turn it on if it is specified in the led_colors array
+            uint8_t pin;
+            switch (led_colors[i][j]) {
+                case RED:
+                    pin = rgb_rows[j][0];
+                    break;
+                case GREEN:
+                    pin = rgb_rows[j][1];
+                    break;
+                case BLUE:
+                    pin = rgb_rows[j][2];
+                    break;
+                default:
+                    pin = 99;
+                    break;
+            }
+            if (pin != 99) {
+                leds_io.digitalWrite(pin, HIGH);
+                high_pins[j] = pin;
+            } else {
+                leds_io.digitalWrite(rgb_rows[j][0], LOW);
+                leds_io.digitalWrite(rgb_rows[j][1], LOW);
+                leds_io.digitalWrite(rgb_rows[j][2], LOW);
+            }
 
-void animate_leds(){
-    unsigned long currentMillis = millis();
-    if (currentMillis - prevMillis >= interval) {
-        prevMillis = currentMillis;
-        led_colors[i][j] = static_cast<colors>((led_colors[i][j] + 1) % NUM_COLORS);
-        Serial.print("Updated led_colors[");
-        Serial.print(i);
-        Serial.print("][");
-        Serial.print(j);
-        Serial.print("] to ");
-        Serial.println(led_colors[i][j]);
-
-        change_led_color_by_array(i, j, led_colors[i][j]);
-
-        j++;
-        if (j >= NUM_COLORS) {
-            j = 0;
-            i++;
-            if (i >= LED_ROWS) {
-                // pull the ground pin high to turn off the leds
-                i = 0;
+        }
+        delay(1);
+        // turn the ground pin high to turn off the leds
+        leds_io.digitalWrite(rgb_grounds[i], HIGH);
+        // turn off the rows that were turned on
+        for (uint8_t j = 0; j < LED_ROWS; j++) {
+            if (high_pins[j] != 99) {
+                leds_io.digitalWrite(high_pins[j], LOW);
             }
         }
     }
+
+}
+
+void change_led_color_by_index(uint8_t led_index, colors color){
+    // turn the ground pin low to turn on the leds
+    uint8_t i = led_index / LED_ROWS;
+    uint8_t j = led_index % LED_ROWS;
+    led_colors[i][j] = color;
 }
 
 void change_led_color_by_array(uint8_t i, uint8_t j, colors color){
     // turn the ground pin low to turn on the leds
-    leds_io.digitalWrite(rgb_grounds[i], LOW);
-    // turn all leds off but the one specified in color
-    for (uint8_t k = 0; k < NUM_COLORS; k++) {
-        if (k != color) {
-            leds_io.digitalWrite(rgb_rows[i][k], LOW);
-        } else {
-            leds_io.digitalWrite(rgb_rows[i][k], HIGH);
-        }
-    }
+    led_colors[i][j] = color;
 }

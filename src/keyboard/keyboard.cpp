@@ -5,6 +5,7 @@
 #include "chords.h"
 #include "midible/midioverble.h"
 #include <SparkFunSX1509.h>               //Click here for the library: http://librarymanager/All#SparkFun_SX1509
+#include "lights.h"
 
 SX1509 io;                        // Create an SX1509 object for buttons
 
@@ -142,6 +143,17 @@ void process_pressed_key() {
             midi_chord_item.notes[i] = keys[key_index].midi_note;
             pressed[key_index] = item.is_pressed;
             print_key(key_index, true);
+            // change the color of light in array to red if pressed
+            colors currentColor;
+            if (item.is_pressed) {
+                if (i == 0)
+                    currentColor = RED;
+                else
+                    currentColor = GREEN;
+            } else {
+                currentColor = noLight;
+            }
+            change_led_color_by_index(key_index, currentColor);
         }
 
         midi_chords_queue.enqueue(midi_chord_item);

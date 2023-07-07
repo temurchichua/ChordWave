@@ -14,7 +14,7 @@ public:
     }
 
     void init(uint8_t address_i2c = 0x3C){
-        this->setI2CAddress(address_i2c*2);
+//        this->setI2CAddress(address_i2c*2);
         this->begin();
 
         this->setBitmapMode(1);

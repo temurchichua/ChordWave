@@ -17,14 +17,14 @@ enum colors {
     noLight,
     RED,
     GREEN,
-    BLUE
+    BLUE,
 };
 
 const byte SX1509_LEDS_ADDRESS = 0x3E;   // SX1509 I2C address
-static colors led_colors[LED_COLUMNS][LED_ROWS]; // array of colors for each led
 
 // functions
 void init_leds(); // Initialize the leds
+void print_leds(); // Print the full leds to the display
 void animate_leds(); // Animate the leds
 void change_led_color_by_index(uint8_t led_index, colors color); // Change the color of a single led
 void change_led_color_by_array(uint8_t i, uint8_t j, colors color); // Change the color of a single led by array
