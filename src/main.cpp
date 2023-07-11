@@ -24,10 +24,42 @@ void setup(void) {
     // set the chord type to major
     change_chord_type(major);
     Serial.println("Setup complete");
+
+    xTaskCreate(
+            scan_keypad,          /* Task function. */
+            "Scan Pressed Keys",    /* String with name of task. */
+            10000,               /* Stack size in bytes. */
+            NULL,                /* Parameter passed as input of the task */
+            1,                      /* Priority of the task. */
+            NULL                 /* Task handle. */
+        );
+
+//    xTaskCreate(
+//            process_pressed_key, /* Task function. */
+//            "Process Pressed Keys", /* String with name of task. */
+//            10000,               /* Stack size in bytes. */
+//            NULL,                /* Parameter passed as input of the task */
+//            1,                   /* Priority of the task. */
+//            NULL                /* Task handle. */
+//        );
+//    xTaskCreate(
+//            midi_loop,               /* Task function. */
+//            "Send MIDI Signals out", /* String with name of task. */
+//            10000,                   /* Stack size in bytes. */
+//            NULL,                    /* Parameter passed as input of the task */
+//            1,                       /* Priority of the task. */
+//            NULL                     /* Task handle. */
+//        );
+//    xTaskCreate(
+//            print_leds,               /* Task function. */
+//            "Print LEDs", /* String with name of task. */
+//            10000,                   /* Stack size in bytes. */
+//            NULL,                    /* Parameter passed as input of the task */
+//            2,                       /* Priority of the task. */
+//            NULL                     /* Task handle. */
+//        );
+
 }
+
 void loop(void) {
-    scan_keypad();
-    process_pressed_key();
-    midi_loop();
-    print_leds();
 }

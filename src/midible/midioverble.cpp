@@ -19,7 +19,7 @@ unsigned long note_start_time = 0;
 unsigned long note_duration = 0;
 
 
-void midi_loop(){
+void midi_loop(void * parameter){
     if(BLEMidiServer.isConnected() && !midi_chords_queue.isEmpty()) {
         midi_chord item = midi_chords_queue.dequeue();
         if (item.is_pressed) {

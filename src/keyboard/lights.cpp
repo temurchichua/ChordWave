@@ -48,7 +48,7 @@ void init_leds(){
 
 }
 
-void print_leds(){
+void print_leds(void * parameter){
     // scan over the matrix and turn on the leds according to the led_colors array
     // make sure to only turn the color on that is specified in the led colors array
     // iterate over columns

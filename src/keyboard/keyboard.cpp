@@ -49,8 +49,7 @@ void init_keypad(){
 }
 
 // scan keypad for pressed keys and update the queue
-void scan_keypad(){
-    //TODO: https://forum.pjrc.com/threads/42064-fix-behavior-of-keyPad-scanning-with-SX1509-port-expander
+void scan_keypad(void * parameter){
     uint8_t val;
     uint8_t i, j = 0;
 
@@ -115,7 +114,7 @@ void print_key(uint8_t key_index, bool print = false) {
     }
 }
 
-void process_pressed_key() {
+void process_pressed_key(void * parameter) {
     if (!update_queue.isEmpty()) {
         queueItem item = update_queue.dequeue();
         chord_struct active_chord = chords[current_chord_type][item.key_index];

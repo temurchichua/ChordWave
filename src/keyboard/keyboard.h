@@ -29,11 +29,11 @@ static int8_t debounce_count[NUM_BTN_COLUMNS][NUM_BTN_ROWS]; // debounce counter
 
 // functions
 void init_keypad(); // Initialize the keypad
-void scan_keypad(); // scan keypad for pressed keys and update the queue
+void scan_keypad(void * parameter); // scan keypad for pressed keys and update the queue
 void print_keyboard(); // Print the full keyboard to the display
 void animate_keyboard(); // Animate the keyboard
 
 void update_key_by_index(uint8_t key_index, bool is_pressed); // Update the pressed array by index
 void print_key(uint8_t key_index, bool print ); // Print a single key to the display
-void process_pressed_key(); // Check the queue and update the pressed array and display
+void process_pressed_key(void * parameter); // Check the queue and update the pressed array and display
 #endif //CHORDWAVE_KEYBOARD_H

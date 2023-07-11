@@ -17,5 +17,5 @@ typedef struct {
 extern ArduinoQueue<midi_chord> midi_chords_queue;
 
 void setup_midi_over_ble();
-void midi_loop();
+void midi_loop(void * parameter);
 #endif //CHORDWAVE_MIDIOVERBLE_H
