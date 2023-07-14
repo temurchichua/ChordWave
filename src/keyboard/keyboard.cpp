@@ -50,47 +50,50 @@ void init_keypad(){
 
 // scan keypad for pressed keys and update the queue
 void scan_keypad(void * parameter){
-    uint8_t val;
-    uint8_t i, j = 0;
+    while (true) {
+        uint8_t val;
+        uint8_t i, j = 0;
 
-    while (i < NUM_BTN_COLUMNS) {
-        io.digitalWrite(button_grounds[i], LOW); // select the column to read
+        while (i < NUM_BTN_COLUMNS) {
+            io.digitalWrite(button_grounds[i], LOW); // select the column to read
 
-        // Read the button inputs
-        for ( j = 0; j < NUM_BTN_ROWS; j++) {
-            val = io.digitalRead(button_rows[j]);
-            uint8_t key_index = (i * NUM_BTN_ROWS) + j;
+            // Read the button inputs
+            for (j = 0; j < NUM_BTN_ROWS; j++) {
+                val = io.digitalRead(button_rows[j]);
+                uint8_t key_index = (i * NUM_BTN_ROWS) + j;
 
-            if (val == LOW) {
-                // active low: val is low when btn is pressed
-                if (debounce_count[i][j] < MAX_DEBOUNCE) {
-                    debounce_count[i][j]++;
-                    if (debounce_count[i][j] == MAX_DEBOUNCE ) {
-                        Serial.print("Key Down ");
-                        Serial.println((i * NUM_BTN_ROWS) + j);
-                        if (key_index < 12)
-                            update_key_by_index(key_index, true);
-                        else
-                            change_chord_type((chord_type) (key_index - 12));
+                if (val == LOW) {
+                    // active low: val is low when btn is pressed
+                    if (debounce_count[i][j] < MAX_DEBOUNCE) {
+                        debounce_count[i][j]++;
+                        if (debounce_count[i][j] == MAX_DEBOUNCE) {
+                            Serial.print("Key Down ");
+                            Serial.println((i * NUM_BTN_ROWS) + j);
+                            if (key_index < 12)
+                                update_key_by_index(key_index, true);
+                            else
+                                change_chord_type((chord_type) (key_index - 12));
+                        }
                     }
-                }
-            } else {
-                // otherwise, button is released
-                if (debounce_count[i][j] > 0) {
-                    debounce_count[i][j]--;
-                    if (debounce_count[i][j] == 0 ) {
-                        Serial.print("Key Up ");
-                        Serial.println((i * NUM_BTN_ROWS) + j);
-                        if (key_index < 12)
-                            update_key_by_index(key_index, false);
+                } else {
+                    // otherwise, button is released
+                    if (debounce_count[i][j] > 0) {
+                        debounce_count[i][j]--;
+                        if (debounce_count[i][j] == 0) {
+                            Serial.print("Key Up ");
+                            Serial.println((i * NUM_BTN_ROWS) + j);
+                            if (key_index < 12)
+                                update_key_by_index(key_index, false);
+                        }
                     }
                 }
             }
-        }
 
-        // deselect the column
-        io.digitalWrite(button_grounds[i], HIGH);
-        i++;
+            // deselect the column
+            io.digitalWrite(button_grounds[i], HIGH);
+            i++;
+        }
+    vTaskDelay(10 / portTICK_RATE_MS);
     }
 }
 
